@@ -1,0 +1,27 @@
+{
+  "name": "pager",
+  "repo": "heatroom/pager",
+  "description": "Pager UI Component",
+  "version": "0.0.1",
+  "keywords": [
+    "pager",
+    "ui",
+    "paginate",
+    "pagination"
+  ],
+  "dependencies": {
+    "component/emitter": "1.0.1",
+    "component/jquery": "*",
+    "component/bind": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "template.js"
+  ],
+  "styles": [
+    "pager.css"
+  ]
+}

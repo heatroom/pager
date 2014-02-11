@@ -1,0 +1,52 @@
+.l {
+  float: left;
+}
+
+.r {
+  float: right;
+}
+
+.nav-paginator {
+  padding: 20px 0;
+}
+
+.pager {
+  margin: 0;
+}
+
+.pager li {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+}
+
+.pager-hide {
+  opacity: .2;
+  filter: Alpha(opacity=20);
+}
+
+.pager li.active a {
+  font-weight: bold;
+  border-color: #ddd;
+  background-color: #0072C6;
+  color: #fff;
+  border: 1px solid #0072C6;
+  cursor: default;
+}
+
+.pager li a {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+  text-decoration: none;
+  height: 28px;
+  line-height: 28px;
+  border: 1px solid #DDD;
+  padding: 0px 12px;
+  margin: 0 2px;
+}
+.pager li a:hover{ 
+  border:1px solid #0072c6;
+  background-color: #0072C6;
+  color: #fff;
+}
