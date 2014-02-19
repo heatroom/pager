@@ -5,7 +5,7 @@
 
 var Emitter = require('emitter')
   , html = require('./template')
-  , $ = require('jquery')
+  , o = require('jquery')
   , bind = require('bind');
 
 /**
@@ -22,10 +22,12 @@ module.exports = Pager;
 
 function Pager() {
   Emitter.call(this);
-  this.el = $(html);
+  this.el = o(html);
   this.el.on('click', 'li > a', bind(this, this.onclick));
-  this.edges = 2;
+  this.page = this.el.find('.pager');
   this.displayedPages = 5;
+  this.edges = 2;
+  this.ellipseText = '&hellip;';
   this.perpage(10);
   this.total(0);
   this.show(0);
@@ -45,7 +47,7 @@ Emitter(Pager.prototype);
 
 Pager.prototype.onclick = function(e){
   e.preventDefault();
-  var el = $(e.target).parent();
+  var el = o(e.target).parent();
   if (el.hasClass('prev')) return this.prev();
   if (el.hasClass('next')) return this.next();
   this.show(el.text() - 1);
@@ -137,39 +139,111 @@ Pager.prototype.total = function(n){
 };
 
 /**
+ * Append the index to the page.
+ *
+ * @param {Number} n
+ * @return {Pager}
+ * @api public
+ */
+
+Pager.prototype.append = function (n, control) {
+  if (control ) {
+    if(control === "prev") {
+      this.page.append('<li class="prev"><a href="#"><< 上一页</a></li>');
+    } else if (control === "next") {
+      this.page.append('<li class="next"><a href="#">下一页 >></a></li>');
+    } else {
+      this.page.append('<li class="page"><a href="#">' + this.ellipseText + '</a></li>');
+    }
+  } else {
+    if (n === this.current) {
+      this.page.append('<li class="page active"><a href="#">' + (n+1) + '</a></li>');
+    } else {
+      this.page.append('<li class="page"><a href="#">' + (n+1) + '</a></li>');
+    }
+    
+  }
+}
+
+/**
  * Render the pager.
  *
  * @api public
  */
 
 Pager.prototype.render = function(){
-  var total = this._total;
-  var curr = this.current;
-  var per = this._perpage;
-  var pages = this.pages();
   var el = this.el;
-  var prev = el.find('.prev');
-  var next = el.find('.next');
+  var curr = this.current;
+
+  var pages = this.pages();
+  var edges = this.edges;
+  var displayedPages = this.displayedPages;
+  var halfDisplayed = displayedPages / 2;
+
+
+  var start = Math.ceil(
+    curr > halfDisplayed ? 
+    Math.max(Math.min(curr - halfDisplayed, (pages - displayedPages)), 0) 
+    : 0);
+
+  var end = Math.ceil(
+    curr > halfDisplayed ? 
+    Math.min(curr + halfDisplayed, pages) : 
+    Math.min(displayedPages, pages));
+
+  var page = this.page;
+    
   var links = '';
+  var i = 0;
 
   // remove old
-  el.find('li.page').remove();
+  el.find('.pager').empty();
 
-  // page links
-  for (var i = 0; i < pages; ++i) {
-    var n = i + 1;
-    links += curr == i
-      ? '<li class="page active"><a href="#">' + n + '</a></li>'
-      : '<li class="page"><a href="#">' + n + '</a></li>';
+  // Generate Prev link
+  this.append(0, 'prev');
+
+  // Generate start edges
+  if (start > 0) {
+    var _end = Math.min(edges, start);
+    for (i = 0; i < _end; i++) {
+      this.append(i);
+    }
+    if (edges < start && (start - edges !== 1)) {
+      this.append(0, 'ellipse');
+    } else if (start - edges === 1){
+      this.append(edges);
+    }
   }
 
-  // insert
-  if (links) $(links).insertAfter(prev);
+  // Generate interval links
+  for (i = start; i < end; i++) {
+    this.append(i);;
+  }
+
+  // Generate end edges
+  if (end < pages) {
+    if (pages - edges > end && (pages - edges - end !== 1)) {
+      this.append(0, 'ellipse');
+    } else if (pages - edges - end === 1){
+      this.append(end);
+    }
+    var begin = Math.max(pages - edges, end);
+    for (i = begin; i < pages; i++) {
+      this.append(i);
+    }
+  }
+
+  // Generate Next link
+  this.append(0, 'next');
+
+  var prev = el.find('.prev');
+  var next = el.find('.next');
 
   // prev
   if (curr) {
     prev.removeClass('pager-hide');
-  } else {
+  }
+  else {
     prev.addClass('pager-hide');
     prev.unbind('click', 'a');
   }
@@ -177,7 +251,8 @@ Pager.prototype.render = function(){
   // next
   if (curr < pages - 1) {
     next.removeClass('pager-hide');
-  } else {
+  }
+  else {
     next.addClass('pager-hide');
     next.unbind('click', 'a');
   }
